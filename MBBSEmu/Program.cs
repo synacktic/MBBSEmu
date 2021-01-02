@@ -22,6 +22,9 @@ using System.Linq;
 using System.Text;
 using MBBSEmu.Disassembler;
 using MBBSEmu.DOS;
+using MBBSEmu.GUI;
+using MBBSEmu.GUI.Logging;
+using MBBSEmu.Logging;
 
 namespace MBBSEmu
 {
@@ -89,7 +92,12 @@ namespace MBBSEmu
         /// <summary>
         ///     Module Configuration
         /// </summary>
-        private readonly List<ModuleConfiguration> _moduleConfigurations = new List<ModuleConfiguration>();
+        private readonly List<ModuleConfiguration> _moduleConfigurations = new();
+
+        /// <summary>
+        ///     Specifies if the user is running in headless mode
+        /// </summary>
+        private bool _isHeadless;
 
         private readonly List<IStoppable> _runningServices = new List<IStoppable>();
         private int _cancellationRequests = 0;
@@ -210,14 +218,26 @@ namespace MBBSEmu
                             _isConsoleSession = true;
                             break;
                             }
+                        case "-HEADLESS":
+                            _isHeadless = true;
+                            break;
                         default:
                             Console.WriteLine($"Unknown Command Line Argument: {args[i]}");
                             return;
                     }
                 }
-
                 _serviceResolver = new ServiceResolver();
                 _logger = _serviceResolver.GetService<ILogger>();
+
+                if (!_isHeadless)
+                {
+                    (_logger as CustomLogger)?.DisableConsoleLogging();
+                    var ui = new MainInterface();
+                    (_logger as CustomLogger)?.AddCustomTarget(ui.UILogger);
+                    ui.Start();
+                }
+
+                
 
                 //EXE File Execution
                 if (!string.IsNullOrEmpty(_exeFile))
@@ -391,6 +411,8 @@ namespace MBBSEmu
 
                 if (_isConsoleSession)
                     _ = new LocalConsoleSession(_logger, "CONSOLE", host);
+
+                
             }
             catch (Exception e)
             {

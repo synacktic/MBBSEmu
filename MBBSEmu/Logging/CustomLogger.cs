@@ -1,5 +1,6 @@
 using NLog;
 using NLog.Conditions;
+using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets;
 using SQLitePCL;
@@ -79,6 +80,14 @@ namespace MBBSEmu.Logging
         public void EnableConsoleLogging()
         {
             LogManager.Configuration.AddTarget("consoleLogger", CreateConsoleTarget());
+        }
+
+        public void AddCustomTarget(Target customTarget)
+        {
+            LogManager.Configuration.AddTarget(customTarget.Name, customTarget);
+            LogManager.Configuration.AddRuleForAllLevels(customTarget);
+            LogManager.Configuration.Reload();
+            LogManager.ReconfigExistingLoggers();
         }
     }
 }

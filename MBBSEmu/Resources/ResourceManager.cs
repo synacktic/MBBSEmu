@@ -15,7 +15,7 @@ namespace MBBSEmu.Resources
     public class ResourceManager : IResourceManager
     {
         private readonly Assembly _assembly;
-        private readonly Dictionary<string, byte[]> _resourceCache = new Dictionary<string, byte[]>();
+        private readonly Dictionary<string, byte[]> _resourceCache = new();
         private static readonly byte[] utf8bom = {0xEF, 0xBB, 0xBF};
 
         public ResourceManager() : this(Assembly.GetExecutingAssembly()) {}
