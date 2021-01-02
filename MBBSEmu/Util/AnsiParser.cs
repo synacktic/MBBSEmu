@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System;
 
 namespace MBBSEmu.Util
@@ -48,6 +49,18 @@ namespace MBBSEmu.Util
         };
 
     private AnsiParseState _state = AnsiParseState.NORMAL;
+
+    public ReadOnlySpan<byte> parseAnsiString(ReadOnlySpan<byte> str)
+    {
+      var memoryStream = new MemoryStream(str.Length);
+      foreach (var b in str)
+      {
+        var c = parseAnsiCharacter((char)b);
+        if (c != default)
+          memoryStream.WriteByte((byte)c);
+      }
+      return memoryStream.ToArray();
+    }
 
     public char parseAnsiCharacter(char c)
     {
