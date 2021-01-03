@@ -22,7 +22,7 @@ namespace MBBSEmu.DependencyInjection
     public class ServiceResolver : IDisposable
     {
         private ServiceProvider _provider;
-        private readonly ServiceCollection _serviceCollection = new ServiceCollection();
+        private readonly ServiceCollection _serviceCollection = new();
 
         public void Dispose()
         {

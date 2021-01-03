@@ -3,7 +3,6 @@ using NLog.Conditions;
 using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets;
-using SQLitePCL;
 
 namespace MBBSEmu.Logging
 {
@@ -14,7 +13,7 @@ namespace MBBSEmu.Logging
     {
         static CustomLogger()
         {
-            var config = new NLog.Config.LoggingConfiguration();
+            var config = new LoggingConfiguration();
 
             var consoleLogger = CreateConsoleTarget();
             config.AddTarget(consoleLogger);
@@ -86,8 +85,8 @@ namespace MBBSEmu.Logging
         {
             LogManager.Configuration.AddTarget(customTarget.Name, customTarget);
             LogManager.Configuration.AddRuleForAllLevels(customTarget);
-            LogManager.Configuration.Reload();
             LogManager.ReconfigExistingLoggers();
+            LogManager.Configuration.Reload();
         }
     }
 }

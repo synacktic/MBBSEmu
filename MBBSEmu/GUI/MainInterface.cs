@@ -1,11 +1,13 @@
 ﻿using MBBSEmu.GUI.Logging;
 using MBBSEmu.Resources;
 using System.Collections.Generic;
+using System.Threading;
+using MBBSEmu.Server;
 using Terminal.Gui;
 
 namespace MBBSEmu.GUI
 {
-    public class MainInterface
+    public class MainInterface : IStoppable
     {
         /// <summary>
         ///     Main UI Window
@@ -24,6 +26,8 @@ namespace MBBSEmu.GUI
         private readonly List<string> _views = new() { "MBBSEmu Logs" };
 
         public readonly UILoggingTarget UILogger;
+
+        public Thread InterfaceThread;
 
         public MainInterface()
         {
@@ -77,7 +81,8 @@ namespace MBBSEmu.GUI
 
         public bool Start()
         {
-            Application.Run();
+            InterfaceThread = new Thread(Application.Run);
+            InterfaceThread.Start();
             return true;
         }
 
@@ -101,20 +106,33 @@ namespace MBBSEmu.GUI
 
                         var _logView = new ScrollView()
                         {
+                            ContentSize = new Size(200, 200),
                             ShowVerticalScrollIndicator = true,
-                            ShowHorizontalScrollIndicator = true
+                            ShowHorizontalScrollIndicator = true,
+                            X = 0,
+                            Y = 0,
+                            Height = Dim.Fill(),
+                            Width = Dim.Fill()
                         };
 
-                        foreach(var l in UILogger.Log)
-                            _logView.Add(new TextField(l));
+                        for (var i = 0; i < UILogger.Log.Count; i++)
+                        {
+                            var l = UILogger.Log[i];
+                            _logView.Add(new TextField(0, i, 255, l));
+                        }
 
+                        _logView.ScrollDown(UILogger.Log.Count);
                         _viewDetailWindow.Add(_logView);
                         _mainWindow.Add(_viewDetailWindow);
-                        Application.Run();
                         break;
                     }
             }
 
+        }
+
+        public void Stop()
+        {
+            Application.RequestStop();
         }
     }
 }

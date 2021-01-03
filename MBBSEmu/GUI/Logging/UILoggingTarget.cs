@@ -17,24 +17,11 @@ namespace MBBSEmu.GUI.Logging
             this.Name = name;
         }
 
+      
         protected override void Write(LogEventInfo logEvent)
         {
             Log.Add(RenderLogEvent(Layout, logEvent));
         }
-
-        protected override void Write(IList<AsyncLogEventInfo> logEvents)
-        {
-            base.Write(logEvents);
-        }
-
-        protected override void WriteAsyncThreadSafe(AsyncLogEventInfo logEvent)
-        {
-            base.WriteAsyncThreadSafe(logEvent);
-        }
-
-        protected override void WriteAsyncThreadSafe(IList<AsyncLogEventInfo> logEvents)
-        {
-            base.WriteAsyncThreadSafe(logEvents);
-        }
+        
     }
 }
