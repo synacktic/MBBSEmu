@@ -4,7 +4,7 @@ using System;
 
 namespace MBBSEmu.Util
 {
-  class AnsiParser
+  public class AnsiParser
   {
     public enum AnsiColor
     {
@@ -50,19 +50,19 @@ namespace MBBSEmu.Util
 
     private AnsiParseState _state = AnsiParseState.NORMAL;
 
-    public ReadOnlySpan<byte> parseAnsiString(ReadOnlySpan<byte> str)
+    public ReadOnlySpan<byte> ParseAnsiString(ReadOnlySpan<byte> str)
     {
       var memoryStream = new MemoryStream(str.Length);
       foreach (var b in str)
       {
-        var c = parseAnsiCharacter((char)b);
+        var c = ParseAnsiCharacter((char)b);
         if (c != default)
           memoryStream.WriteByte((byte)c);
       }
       return memoryStream.ToArray();
     }
 
-    public char parseAnsiCharacter(char c)
+    public char ParseAnsiCharacter(char c)
     {
       switch (_state) {
         case AnsiParseState.NORMAL when c == ASCII_ESCAPE:
