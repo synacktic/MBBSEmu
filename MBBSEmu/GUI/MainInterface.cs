@@ -95,39 +95,44 @@ namespace MBBSEmu.GUI
                 //MBBSEmu Log
                 case 0:
                     {
-                        _viewDetailWindow = new FrameView("MBBSEmu Log")
-                        {
-                            X = 25,
-                            Y = 1, // for menu
-                            Width = Dim.Fill(),
-                            Height = Dim.Fill(1),
-                            CanFocus = true
-                        };
-
-                        var _logView = new ScrollView()
-                        {
-                            ContentSize = new Size(200, 200),
-                            ShowVerticalScrollIndicator = true,
-                            ShowHorizontalScrollIndicator = true,
-                            X = 0,
-                            Y = 0,
-                            Height = Dim.Fill(),
-                            Width = Dim.Fill()
-                        };
-
-                        for (var i = 0; i < UILogger.Log.Count; i++)
-                        {
-                            var l = UILogger.Log[i];
-                            _logView.Add(new TextField(0, i, 255, l));
-                        }
-
-                        _logView.ScrollDown(UILogger.Log.Count);
-                        _viewDetailWindow.Add(_logView);
-                        _mainWindow.Add(_viewDetailWindow);
+                        UpdateApplicationLog();
                         break;
                     }
             }
 
+        }
+
+        private void UpdateApplicationLog()
+        {
+            _viewDetailWindow = new FrameView("MBBSEmu Log")
+            {
+                X = 25,
+                Y = 1, // for menu
+                Width = Dim.Fill(),
+                Height = Dim.Fill(1),
+                CanFocus = true
+            };
+
+            var _logView = new ScrollView()
+            {
+                ContentSize = new Size(200, 200),
+                ShowVerticalScrollIndicator = true,
+                ShowHorizontalScrollIndicator = true,
+                X = 0,
+                Y = 0,
+                Height = Dim.Fill(),
+                Width = Dim.Fill()
+            };
+
+            for (var i = 0; i < UILogger.Log.Count; i++)
+            {
+                var l = UILogger.Log[i];
+                _logView.Add(new TextField(0, i, 255, l));
+            }
+
+            _logView.ScrollDown(UILogger.Log.Count);
+            _viewDetailWindow.Add(_logView);
+            _mainWindow.Add(_viewDetailWindow);
         }
 
         public void Stop()
