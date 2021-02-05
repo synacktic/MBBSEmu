@@ -3,9 +3,12 @@ using MBBSEmu.Database.Repositories.Account;
 using MBBSEmu.Database.Repositories.AccountKey;
 using MBBSEmu.Date;
 using MBBSEmu.DependencyInjection;
+using MBBSEmu.Disassembler;
+using MBBSEmu.DOS;
 using MBBSEmu.HostProcess;
 using MBBSEmu.HostProcess.Structs;
 using MBBSEmu.IO;
+using MBBSEmu.Logging;
 using MBBSEmu.Memory;
 using MBBSEmu.Module;
 using MBBSEmu.Resources;
@@ -15,13 +18,13 @@ using MBBSEmu.Session.Enums;
 using MBBSEmu.Session.LocalConsole;
 using Microsoft.Extensions.Configuration;
 using NLog;
+using NLog.Layouts;
+using NLog.Targets;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using MBBSEmu.Disassembler;
-using MBBSEmu.DOS;
 
 namespace MBBSEmu
 {
@@ -234,6 +237,22 @@ namespace MBBSEmu
                 var globalCache = _serviceResolver.GetService<IGlobalCache>();
                 var fileHandler = _serviceResolver.GetService<IFileUtility>();
 
+                //Setup Logger from AppSettings
+                LogManager.Configuration.LoggingRules.Clear();
+                CustomLogger.AddLogLevel("consoleLogger", configuration.ConsoleLogLevel);
+                if (!string.IsNullOrEmpty(configuration.FileLogName))
+                {
+                    var fileLogger = new FileTarget("fileLogger")
+                    {
+                        FileNameKind = 0,
+                        FileName = "${var:mbbsdir}" + configuration.FileLogName,
+                        Layout = Layout.FromString("${shortdate} ${time} ${level} ${callsite} ${message}"),
+                    };
+                    LogManager.Configuration.AddTarget(fileLogger);
+                    CustomLogger.AddLogLevel("fileLogger", configuration.FileLogLevel);
+                }
+                LogManager.ReconfigExistingLoggers();
+
                 //Setup Generic Database
                 if (!File.Exists($"BBSGEN.DB"))
                 {
@@ -351,9 +370,10 @@ namespace MBBSEmu
                 if (configuration.TelnetEnabled)
                 {
                     var telnetService = _serviceResolver.GetService<ISocketServer>();
-                    telnetService.Start(EnumSessionType.Telnet, configuration.TelnetPort);
+                    var telnetHostIP = configuration.TelnetIPAddress;
 
-                    _logger.Info($"Telnet listening on port {configuration.TelnetPort}");
+                    telnetService.Start(EnumSessionType.Telnet, telnetHostIP, configuration.TelnetPort);
+                    _logger.Info($"Telnet listening on IP {telnetHostIP} port {configuration.TelnetPort}");
 
                     _runningServices.Add(telnetService);
                 }
@@ -362,9 +382,10 @@ namespace MBBSEmu
                 if (configuration.RloginEnabled)
                 {
                     var rloginService = _serviceResolver.GetService<ISocketServer>();
-                    rloginService.Start(EnumSessionType.Rlogin, configuration.RloginPort);
+                    var rloginHostIP = configuration.RloginIPAddress;
 
-                    _logger.Info($"Rlogin listening on port {configuration.RloginPort}");
+                    rloginService.Start(EnumSessionType.Rlogin, rloginHostIP, configuration.RloginPort);
+                    _logger.Info($"Rlogin listening on IP {rloginHostIP} port {configuration.RloginPort}");
 
                     _runningServices.Add(rloginService);
 
@@ -375,7 +396,7 @@ namespace MBBSEmu
                         {
                             _logger.Info($"Rlogin {m.ModuleIdentifier} listening on port {rloginPort}");
                             rloginService = _serviceResolver.GetService<ISocketServer>();
-                            rloginService.Start(EnumSessionType.Rlogin, rloginPort++, m.ModuleIdentifier);
+                            rloginService.Start(EnumSessionType.Rlogin, rloginHostIP, rloginPort++, m.ModuleIdentifier);
                             _runningServices.Add(rloginService);
                         }
                     }

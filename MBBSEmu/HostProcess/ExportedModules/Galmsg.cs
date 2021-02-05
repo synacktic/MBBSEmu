@@ -13,7 +13,12 @@ namespace MBBSEmu.HostProcess.ExportedModules
     {
 
         public const ushort Segment = 0xFFFA;
-        
+
+        public new void Dispose()
+        {
+            base.Dispose();
+        }
+
         internal Galmsg(IClock clock, ILogger logger, AppSettings configuration, IFileUtility fileUtility, IGlobalCache globalCache, MbbsModule module, PointerDictionary<SessionBase> channelDictionary) : base(
             clock, logger, configuration, fileUtility, globalCache, module, channelDictionary)
         {
@@ -25,7 +30,7 @@ namespace MBBSEmu.HostProcess.ExportedModules
             {
                 var methodPointer = new FarPtr(0xFFFC, ordinal);
 #if DEBUG
-                //_logger.Info($"Returning Method Offset {methodPointer.Segment:X4}:{methodPointer.Offset:X4}");
+                //_logger.Debug($"Returning Method Offset {methodPointer.Segment:X4}:{methodPointer.Offset:X4}");
 #endif
                 return methodPointer.Data;
             }
